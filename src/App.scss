@@ -2,5 +2,12 @@
   display: flex;
   flex-direction: row;
   padding: 48px 72px 100px 72px;
-  gap: 24px;
+  row-gap: 24px;
+}
+
+@media screen and (max-width: 360px) {
+  .hero {
+    padding: 12px;
+    row-gap: unset;
+  }
 }
