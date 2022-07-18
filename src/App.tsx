@@ -5,7 +5,7 @@ import './components/InfoBox/infoBox.scss';
 import './components/SummaryBox/summaryBox.scss';
 import './components/QuantityRocket/quantityRocker.scss';
 import ImageBox from './components/ImageBox/ImageBox';
-import { Product } from './components/Data/module';
+import { Product, ProductOption } from './components/Data/module';
 import Star from './components/InfoBox/4782FF90-406B-4FAB-A7C9-1956E1DB1136.png';
 import CheckIcon from './components/InfoBox/2B288867-9DEB-4BA1-B6FB-682E9A5A114B.png';
 import Logo from './components/InfoBox/Logo.png';
@@ -19,59 +19,72 @@ import IconInfo from './components/SummaryBox/9E66FD8E-DFE9-4903-94CF-8168704164
 import IconMail from './components/SummaryBox/DE463F6E-D57D-4B9C-8F2A-76099E63085D.png';
 import QuantityRocker from './components/QuantityRocket/QuantityRocker';
 
+type CartProduct = {
+  label:string,
+  symbol: string,
+  price: number,
+  count: number,
+}
+
 const App = () => {
   const [productData, setProductData] = useState<Product>();
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const options = (productData) && Object.values(productData.options);
-
-  const initialOptions = (options) && options.map((option) => ({
-    label: option.label, symbol: option.price.currency.symbol, price: option.price.value, count: 0,
-  }));
+  const [cart, setCart] = useState<CartProduct[]>([]);
 
   const getProductData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('https://fe-assignment.vaimo.net/');
+      const response = await axios.get('https://fe-assignment.vaimo.net');
       setProductData(response.data.product);
-    } catch (error:any) {
+      setCart(Object.values(response.data.product.options)
+        .map((option:any) => ({
+          label: option.label,
+          symbol: option.price.currency.symbol,
+          price: option.price.value,
+          count: 0,
+        })));
+    } catch (error: any) {
       setErrorMessage(error);
     } finally {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    getProductData()
+      .then();
+  }, []);
 
-  const shippingProps = productData && Object.keys(productData.shipping.props)
+  if (!productData) {
+    return null;
+  }
+
+  const options = Object.values(productData.options);
+
+  const shippingProps = Object.keys(productData.shipping.props)
     .map((prop) => prop
       .split('_')
       .map((word) => word.replace(word[0], word[0].toUpperCase()))
       .join(' '));
 
-  const reviewRate = (rating: number) => {
-    const starCount = [];
-    for (let i = 0; i < rating; i + 1) {
-      starCount.push(i);
-    }
-    return starCount;
-  };
+  const reviewRate = [...Array(Math.floor(parseFloat(productData.reviews.rating)))];
 
-  const currencyCode = options?.map((option) => option.price.currency.symbol);
+  const currencyCode = options.map((option) => option.price.currency.symbol);
 
   const currentPrices = () => {
     const prices: number[] = [];
-    if (options) { options.map((option) => prices.push(option.price.value)); }
+    options.map((option) => prices.push(option.price.value));
     return prices.sort((a, b) => a - b);
   };
 
   const oldPrices = () => {
     const prices: number[] = [];
-    if (options) { options.map((option) => prices.push(option.old_price.value)); }
+    options.map((option) => prices.push(option.old_price.value));
     return prices.sort((a, b) => a - b);
   };
 
   const timeLeft = () => {
-    const distance = productData && new Date(productData.discount.end_date).getTime() - new Date().getTime();
+    const distance = new Date(productData.discount.end_date).getTime() - new Date().getTime();
     const days = distance && Math.floor(distance / (1000 * 60 * 60 * 24));
     const hours = distance && Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = distance && Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
@@ -79,33 +92,39 @@ const App = () => {
     return `${days}d:${hours}h:${minutes}m:${seconds}s`;
   };
 
-  useEffect(() => {
-    getProductData().then();
-  }, []);
+  const changeCount = (i: number, step: number) => {
+    const newCart = [...cart];
+    newCart[i].count = cart[i].count + step;
+    return newCart;
+  };
+
+  const setCountValue = (i:number, value:number) => {
+    const newCart = [...cart];
+    newCart[i].count = value;
+    return newCart;
+  };
 
   return (
     <div className="hero">
-
-      {productData && (
       <div className="row center-xs">
         <div className="col-xs-12 col-md-4">
           <ImageBox imageSrc={productData.gallery[0].main} />
         </div>
         <div className="col-xs-12 col-md-5">
           {shippingProps
-            && (
-            <div className="row">
-              <div className="infoBox__shipProps">{shippingProps[0]}</div>
-              <div className="infoBox__shipProps-icon">
-                <img className="shipProps__icon" src={CheckIcon} alt={shippingProps[1]} />
-                {shippingProps[1]}
-              </div>
-              <div className="infoBox__shipProps-icon">
-                <img className="shipProps__icon" src={CheckIcon} alt={shippingProps[1]} />
-                {shippingProps[2]}
-              </div>
-            </div>
-            )}
+                && (
+                  <div className="row">
+                    <div className="infoBox__shipProps">{shippingProps[0]}</div>
+                    <div className="infoBox__shipProps-icon">
+                      <img className="shipProps__icon" src={CheckIcon} alt={shippingProps[1]} />
+                      {shippingProps[1]}
+                    </div>
+                    <div className="infoBox__shipProps-icon">
+                      <img className="shipProps__icon" src={CheckIcon} alt={shippingProps[1]} />
+                      {shippingProps[2]}
+                    </div>
+                  </div>
+                )}
 
           <div className="row">
             <div className="infoBox__product-name">
@@ -123,9 +142,9 @@ const App = () => {
 
           <div className="row">
             <div className="infoBox__review">
-              {reviewRate(Number(productData.reviews.rating)).map((star) => (
+              {reviewRate.map((star) => (
                 <div key={Math.random()}>
-                  <img src={Star} alt={star.toString()} />
+                  <img src={Star} alt={star} />
                 </div>
               ))}
               <span className="review__rating">{productData.reviews.rating}</span>
@@ -143,36 +162,34 @@ const App = () => {
           </div>
 
           <div className="row">
-            {currencyCode && (
-              <div className="infoBox__price">
-                <span className="price__currentValue">
-                  {currencyCode[0]}
-                  {' '}
-                  {currentPrices()[0]}
-                  {' '}
-                  -
-                  {' '}
-                  {currencyCode[currencyCode.length - 1]}
-                  {' '}
-                  {currentPrices()[currentPrices().length - 1]}
-                </span>
-                <span className="price__options">/ Option</span>
-                <span className="price__separator">|</span>
-                <span>2 Options </span>
-                <span className="price__options">(Min.Order)</span>
-                <p className="price__oldValue">
-                  {currencyCode[0]}
-                  {' '}
-                  {oldPrices()[0]}
-                  {' '}
-                  -
-                  {' '}
-                  {currencyCode[currencyCode.length - 1]}
-                  {' '}
-                  {oldPrices()[oldPrices().length - 1]}
-                </p>
-              </div>
-            )}
+            <div className="infoBox__price">
+              <span className="price__currentValue">
+                {currencyCode[0]}
+                {' '}
+                {currentPrices()[0]}
+                {' '}
+                -
+                {' '}
+                {currencyCode[currencyCode.length - 1]}
+                {' '}
+                {currentPrices()[currentPrices().length - 1]}
+              </span>
+              <span className="price__options">/ Option</span>
+              <span className="price__separator">|</span>
+              <span>2 Options </span>
+              <span className="price__options">(Min.Order)</span>
+              <p className="price__oldValue">
+                {currencyCode[0]}
+                {' '}
+                {oldPrices()[0]}
+                {' '}
+                -
+                {' '}
+                {currencyCode[currencyCode.length - 1]}
+                {' '}
+                {oldPrices()[oldPrices().length - 1]}
+              </p>
+            </div>
           </div>
 
           <div className="row">
@@ -205,7 +222,7 @@ const App = () => {
             <div className="infoBox__options">
               <div className="options__heading">Options:</div>
               <div className="options__products">
-                {initialOptions && initialOptions.map((option, index) => (
+                {cart.map((option, index) => (
                   <div key={Math.random()} className="product__description">
                     <p className="product__label">{option.label}</p>
                     <p className="product__price">
@@ -213,7 +230,20 @@ const App = () => {
                       {' '}
                       {option.price.toFixed(2)}
                     </p>
-                    <QuantityRocker />
+                    <QuantityRocker
+                      count={option.count}
+                      minValue={0}
+                      maxValue={10}
+                      incrementClickHandler={() => {
+                        setCart(changeCount(index, 1));
+                      }}
+                      decrementClickHandler={() => {
+                        setCart(changeCount(index, -1));
+                      }}
+                      inputHandler={(value) => {
+                        setCart(setCountValue(index, value));
+                      }}
+                    />
                   </div>
                 ))}
               </div>
@@ -250,7 +280,24 @@ const App = () => {
 
         <div className="col-xs-12 col-md-3">
           <div className="summary">
-
+            <div>
+              {cart.map((product) => product.count > 0 && (
+              <div key={Math.random()} className="summary__shipping-costs">
+                <div className="shipping__method">
+                  {product.label}
+                  {' '}
+                  x
+                  {' '}
+                  {product.count}
+                </div>
+                <div className="shipping__price">
+                  {product.symbol}
+                  {' '}
+                  {(product.count * product.price).toFixed(2)}
+                </div>
+              </div>
+              ))}
+            </div>
             <div className="summary__shipping-costs">
               <div className="shipping__method">
                 <span className="method__text">
@@ -266,7 +313,7 @@ const App = () => {
               <div className="shipping__price">
                 {productData.shipping.method.cost.currency.symbol}
                 {' '}
-                {productData.shipping.method.cost.value}
+                {productData.shipping.method.cost.value.toFixed(2)}
               </div>
             </div>
 
@@ -296,7 +343,6 @@ const App = () => {
           </div>
         </div>
       </div>
-      )}
     </div>
   );
 };

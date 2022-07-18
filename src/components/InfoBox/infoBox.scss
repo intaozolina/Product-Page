@@ -191,7 +191,7 @@
 
 @media screen and (max-width: 360px) {
   .hero {
-    padding: 12px;
+    padding: 12pt;
   }
 
   .banner__text-delivery {
@@ -204,6 +204,10 @@
 
   .options__heading {
     display: none;
+  }
+
+  .product__description {
+  gap: 30pt;
   }
 
   .product__label {
