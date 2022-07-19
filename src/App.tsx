@@ -5,7 +5,7 @@ import './components/InfoBox/infoBox.scss';
 import './components/SummaryBox/summaryBox.scss';
 import './components/QuantityRocket/quantityRocker.scss';
 import ImageBox from './components/ImageBox/ImageBox';
-import { Product, ProductOption } from './components/Data/module';
+import { Product } from './components/Data/module';
 import Star from './components/InfoBox/4782FF90-406B-4FAB-A7C9-1956E1DB1136.png';
 import CheckIcon from './components/InfoBox/2B288867-9DEB-4BA1-B6FB-682E9A5A114B.png';
 import Logo from './components/InfoBox/Logo.png';
@@ -106,26 +106,25 @@ const App = () => {
 
   return (
     <div className="hero">
+      {errorMessage
+      && <h3>{errorMessage}</h3>}
       <div className="row center-xs">
         <div className="col-xs-12 col-md-4">
           <ImageBox imageSrc={productData.gallery[0].main} />
         </div>
         <div className="col-xs-12 col-md-5">
-          {shippingProps
-                && (
-                  <div className="row">
-                    <div className="infoBox__shipProps">{shippingProps[0]}</div>
-                    <div className="infoBox__shipProps-icon">
-                      <img className="shipProps__icon" src={CheckIcon} alt={shippingProps[1]} />
-                      {shippingProps[1]}
-                    </div>
-                    <div className="infoBox__shipProps-icon">
-                      <img className="shipProps__icon" src={CheckIcon} alt={shippingProps[1]} />
-                      {shippingProps[2]}
-                    </div>
-                  </div>
-                )}
 
+          <div className="row">
+            <div className="infoBox__shipProps">{shippingProps[0]}</div>
+            <div className="infoBox__shipProps-icon">
+              <img className="shipProps__icon" src={CheckIcon} alt={shippingProps[1]} />
+              {shippingProps[1]}
+            </div>
+            <div className="infoBox__shipProps-icon">
+              <img className="shipProps__icon" src={CheckIcon} alt={shippingProps[1]} />
+              {shippingProps[2]}
+            </div>
+          </div>
           <div className="row">
             <div className="infoBox__product-name">
               <span>{productData.name}</span>

@@ -89,5 +89,6 @@ type ProductShippingProps = {
 type ProductReviews = {
   rating: string,
   count: number,
+  // eslint-disable-next-line camelcase
   total_buyers: number,
 }

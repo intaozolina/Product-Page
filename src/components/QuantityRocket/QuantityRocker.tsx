@@ -15,6 +15,7 @@ type QuantityRockerProps = {
 const QuantityRocker:FC<QuantityRockerProps> = ({
   count, incrementClickHandler, decrementClickHandler, inputHandler, minValue, maxValue,
 }) => (
+
   <div className="product__buttons">
     <button
       className="product__decrease-btn"
