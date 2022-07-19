@@ -8,7 +8,7 @@ This is single product page project.
 
 <h5>To get this project done, I use React JS, SCSS. </h5>
 
-<small>P.S. to run code locally - use 'npm run start' in your console </small>
+<sub>P.S. to run code locally - use 'npm run start' in your console </sub>
 
 <hr>
 <img src="src/product-page.gif" alt="Product Page">
